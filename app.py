@@ -12,7 +12,7 @@ load_dotenv()
 # App configuration
 st.set_page_config(
     page_title="Automated RAG-Based Document Q&A System",
-    page_icon="??",
+    page_icon="",
     layout="wide",
 )
 
@@ -28,7 +28,7 @@ if "messages" not in st.session_state:
 os.makedirs("data", exist_ok=True)
 
 # Main Application
-st.title("?? Document Q&A Assistant")
+st.title("Document Q&A Assistant")
 st.markdown("Ask questions based on your uploaded documents.")
 
 # Sidebar for controls
