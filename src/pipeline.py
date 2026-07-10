@@ -1,7 +1,6 @@
 import logging
 from src.ingestion import DataIngestion
 from src.retriever import DSARetriever
-from src.validator import ResponseValidator
 from src.logger import QueryLogger
 
 logging.basicConfig(level=logging.INFO)
@@ -11,7 +10,6 @@ class DSAPipeline:
     def __init__(self):
         # Initialize components
         self.ingestion = DataIngestion()
-        self.validator = ResponseValidator()
         self.query_logger = QueryLogger()
         self.retriever = None
         self.vectorstore = None
@@ -56,26 +54,16 @@ class DSAPipeline:
         context_docs = result.get("context", [])
         context_snippet = "\n".join([doc.page_content for doc in context_docs[:2]]) if context_docs else ""
         context_snippet = context_snippet[:500] + "..." if len(context_snippet) > 500 else context_snippet
-        
-        # 2. Validate response code if present
-        validation = self.validator.validate_response(answer)
-        validation_status = ""
-        if validation["has_code"]:
-            for res in validation["validation_results"]:
-                if res["language"] == "python":
-                    validation_status += f"[Python Valid: {res['is_valid']}] "
-        
-        # 3. Log query and results
+        # 2. Log query and results
         self.query_logger.log_query(
             query=query,
             response=answer,
-            context_snippet=context_snippet,
-            validation_status=validation_status.strip()
+            context_snippet=context_snippet
         )
         
         return {
             "query": query,
             "answer": answer,
-            "context": result.get("context", []),
-            "validation": validation
+            "context": result.get("context", [])
         }
+

@@ -22,24 +22,23 @@ class QueryLogger:
                         timestamp TEXT NOT NULL,
                         query TEXT NOT NULL,
                         response TEXT NOT NULL,
-                        context_snippet TEXT,
-                        validation_status TEXT
+                        context_snippet TEXT
                     )
                 ''')
                 conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Database initialization error: {e}")
 
-    def log_query(self, query, response, context_snippet="", validation_status=""):
+    def log_query(self, query, response, context_snippet=""):
         """Logs a single query and its response."""
         timestamp = datetime.datetime.now().isoformat()
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute('''
-                    INSERT INTO queries (timestamp, query, response, context_snippet, validation_status)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (timestamp, query, response, context_snippet, validation_status))
+                    INSERT INTO queries (timestamp, query, response, context_snippet)
+                    VALUES (?, ?, ?, ?)
+                ''', (timestamp, query, response, context_snippet))
                 conn.commit()
                 return cursor.lastrowid
         except sqlite3.Error as e:
@@ -51,8 +50,13 @@ class QueryLogger:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                cursor.execute('SELECT * FROM queries ORDER BY timestamp DESC')
+                cursor.execute('''
+                    SELECT id, timestamp, query, response, context_snippet
+                    FROM queries
+                    ORDER BY timestamp DESC
+                ''')
                 return cursor.fetchall()
         except sqlite3.Error as e:
             logger.error(f"Error fetching logs: {e}")
             return []
+

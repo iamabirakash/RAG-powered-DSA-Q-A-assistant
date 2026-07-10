@@ -1,6 +1,6 @@
 # RAG-Powered Document Q&A Assistant
 
-A Streamlit-based RAG (Retrieval-Augmented Generation) assistant that answers questions from your uploaded documents, shows retrieval sources, validates Python code snippets in responses, and logs query analytics.
+A Streamlit-based RAG (Retrieval-Augmented Generation) assistant that answers questions from uploaded PDF and text documents, shows retrieval sources, and logs query analytics.
 
 ## Overview
 This project lets you upload `.pdf` and `.txt` files, builds embeddings locally, stores them in a persistent Chroma vector database, and uses an OpenRouter-hosted LLM to generate context-grounded answers.
@@ -14,7 +14,6 @@ The app is now document-domain agnostic (not DSA-only). It is designed to answer
 - Retrieve relevant chunks using MMR for better diversity and fewer duplicate sources.
 - Generate answers with OpenRouter via LangChain `ChatOpenAI` client.
 - Strict context-grounded response behavior when information is missing.
-- Validate Python code blocks in responses using AST parsing.
 - Store query analytics in SQLite (`data/analytics.db`).
 - Display deduplicated source snippets in the UI.
 
@@ -35,7 +34,6 @@ LeetCode Automation/
 |   |-- ingestion.py
 |   |-- pipeline.py
 |   |-- retriever.py
-|   |-- validator.py
 |   `-- logger.py
 |-- data/
 |   |-- .gitkeep
@@ -70,16 +68,14 @@ Implemented in `src/retriever.py`:
 - Uses a strict prompt instructing context-only answers.
 
 ### 5. Post-processing
-Implemented in `src/pipeline.py`, `src/validator.py`, `src/logger.py`:
+Implemented in `src/pipeline.py` and `src/logger.py`:
 - `ask_question()` gets answer + context.
-- Python fenced code blocks are syntax-checked with `ast.parse`.
-- Query, response, context snippet, and validation status are logged to SQLite.
+- Query, response, and context snippet are logged to SQLite.
 
 ### 6. UI rendering
 In `app.py`:
 - Shows chat response.
 - Shows deduplicated source snippets in **Show Sources**.
-- Shows Python syntax validation in **Code Validation Status**.
 - Shows query logs in sidebar **Show Logs**.
 
 ## Setup
@@ -129,8 +125,7 @@ streamlit run app.py
 3. Click **Ingest Data**.
 4. Ask questions in chat.
 5. Expand **Show Sources** to inspect retrieved context.
-6. Expand **Code Validation Status** when Python code appears.
-7. Use **Show Logs** to review analytics.
+6. Use **Show Logs** to review analytics.
 
 ## Data Persistence
 - `chroma_db/`: persistent vector index.
@@ -171,7 +166,7 @@ Do not commit:
 Use `.gitignore` to keep runtime/generated files out of Git.
 
 ## Suggested Improvements
-- Add unit tests for ingestion, retrieval, and validator modules.
+- Add unit tests for ingestion, retrieval, and logging modules.
 - Add source citations with page numbers/chunk scores.
 - Add model selector and temperature controls in UI.
 - Add document management UI (remove selected docs + reindex).
@@ -179,3 +174,4 @@ Use `.gitignore` to keep runtime/generated files out of Git.
 
 ## License
 Add your preferred license (MIT is common for open source projects).
+

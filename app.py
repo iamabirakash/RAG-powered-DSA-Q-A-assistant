@@ -65,7 +65,7 @@ with st.sidebar:
     if st.button("Show Logs"):
         logs = st.session_state.pipeline.query_logger.get_all_logs()
         if logs:
-            df = pd.DataFrame(logs, columns=["ID", "Timestamp", "Query", "Response", "Context Snippet", "Validation"])
+            df = pd.DataFrame(logs, columns=["ID", "Timestamp", "Query", "Response", "Context Snippet"])
             st.dataframe(df.drop(columns=["Response"]))
         else:
             st.info("No queries logged yet.")
@@ -112,16 +112,6 @@ else:
                         st.markdown(f"**Source {source_no}:** {source_name}")
                         st.caption(f"{snippet}...")
                         source_no += 1
-
-                # Show code validation if any
-                validation = result.get("validation", {})
-                if validation.get("has_code"):
-                    with st.expander("Code Validation Status"):
-                        for block in validation.get("validation_results", []):
-                            if block["is_valid"]:
-                                st.success(f"Python block snippet valid Syntax: {block['message']}")
-                            else:
-                                st.warning(f"Warning - code snippet issue: {block['message']}")
-
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})
+
