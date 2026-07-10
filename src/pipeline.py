@@ -16,6 +16,7 @@ class DSAPipeline:
 
     def initialize_system(self, force_reingest=False):
         """Initializes the vector store and retriever, optionally forcing re-ingestion."""
+        vectorstore = None
         existing_vectorstore = None if force_reingest else self.ingestion.get_vector_store()
         if force_reingest:
             logger.info("Force re-ingest enabled. Resetting persisted vector store.")
@@ -23,23 +24,26 @@ class DSAPipeline:
 
         if force_reingest or existing_vectorstore is None:
             logger.info("Building vector store from documents...")
-            self.vectorstore = self.ingestion.ingest_all()
+            vectorstore = self.ingestion.ingest_all()
             # If we still can't build/load, clear persisted state once and retry.
-            if self.vectorstore is None:
+            if vectorstore is None:
                 logger.warning("Vector store unavailable. Resetting persisted Chroma data and retrying ingestion.")
                 self.ingestion.reset_vector_store()
-                self.vectorstore = self.ingestion.ingest_all()
+                vectorstore = self.ingestion.ingest_all()
         else:
             logger.info("Loading existing vector store...")
-            self.vectorstore = existing_vectorstore
+            vectorstore = existing_vectorstore
 
-        if self.vectorstore:
-            self.retriever = DSARetriever(self.vectorstore)
+        if vectorstore:
+            self.vectorstore = vectorstore
+            self.retriever = DSARetriever(vectorstore)
             logger.info("System initialization complete.")
             return True
-        else:
-            logger.warning("Failed to initialize vector store. Add documents to the 'data' directory.")
-            return False
+
+        self.vectorstore = None
+        self.retriever = None
+        logger.warning("Failed to initialize vector store. Add documents to the 'data' directory.")
+        return False
 
     def ask_question(self, query):
         """Main interface to ask a question and get a formatted, logged answer."""

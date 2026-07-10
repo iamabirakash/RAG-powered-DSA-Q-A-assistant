@@ -12,7 +12,7 @@ class QueryLogger:
 
     def _initialize_db(self):
         """Creates the sqlite table if it doesn't exist."""
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        os.makedirs(os.path.dirname(self.db_path) or ".", exist_ok=True)
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -59,4 +59,5 @@ class QueryLogger:
         except sqlite3.Error as e:
             logger.error(f"Error fetching logs: {e}")
             return []
+
 

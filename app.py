@@ -19,7 +19,11 @@ st.set_page_config(
 # Initialize Session State
 if "pipeline" not in st.session_state:
     st.session_state.pipeline = DSAPipeline()
-    if os.path.exists("data") and os.listdir("data"):
+    has_source_documents = os.path.exists("data") and any(
+        name.lower().endswith((".pdf", ".txt")) for name in os.listdir("data")
+    )
+    has_vector_store = os.path.exists("chroma_db") and bool(os.listdir("chroma_db"))
+    if has_source_documents or has_vector_store:
         st.session_state.pipeline.initialize_system()
 if "messages" not in st.session_state:
     st.session_state.messages = []
